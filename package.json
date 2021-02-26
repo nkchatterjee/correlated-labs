@@ -1,0 +1,23 @@
+{
+  "name": "correlated-labs-assessment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nkchatterjee/correlated-labs.git"
+  },
+  "author": "Nisha Chatterjee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nkchatterjee/correlated-labs/issues"
+  },
+  "homepage": "https://github.com/nkchatterjee/correlated-labs#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
