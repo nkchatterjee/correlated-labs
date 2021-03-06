@@ -1,5 +1,6 @@
 'use strict'
 
+const datetime = require('datetime')
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -9,67 +10,59 @@ app.use(bodyParser.json());
 
 const PORT = 4000;
 
-const dictStorage = {};
+const mapStorage = new Map();
 
 // helper functions
-const saveKeyValue = function(key, value){
-	dictStorage[key] = value;
+const saveKeyValue = function(key, value, ttl){
+	mapStorage.set(key, {value, ttl: ttl + (Date.now())/1000});
 };
 
 const getValue = function(key){
-	return dictStorage[key];
+	return mapStorage.get(key);
 };
 
 const deleteValue = function(key){
-	delete dictStorage[key];
+	mapStorage.delete(key);
 };
 
 // set endpoint
 app.post('/set', (req, res) => {
-  // pull out key, value from req.body
-  let { key, value } = req.body
-  // ensure key, value are strings
+  let { key, value, ttl } = req.body
   key = key.toString();
   value = value.toString();
-  // save to local memory
-  saveKeyValue(key, value);
-  // send response
-  return res.status(200).json({ key, value });
+  ttl = parseInt(ttl);
+  saveKeyValue(key, value, ttl);
+  return res.status(200).json({ key, value, ttl });
 })   
 
 // get endpoint
 app.get('/get', (req, res) => {
-  // pull out key from req.query
   let { key } = req.query;
-  // if no key, send error
   if (!key) {
     return res.status(400).json({ message: "Your GET request doesn't include a key" })
   }
-  // if key not in storage, send message
-  if (!dictStorage[key]) {
+  if (!mapStorage.has(key)) {
     return res.status(200).json({ message: "Key doesn't exist" });
   }
-  // get value of valid key
-  const value = getValue(key);
-  // send response
+  const {value, ttl} = getValue(key);
+  if (ttl && Date.now()/1000 > ttl) {
+    mapStorage.delete(key)
+  }
   return res.status(200).json({ key, value });
 });
 
 // delete endpoint
 app.post('/delete', (req, res) => {
-  // return error if no params
   if (JSON.stringify(req.body) === '{}') {
     return res.status(400).json({ error: "Your DELETE request doesn't include parameters" })
   }
-  // pull out key from req.body
   let { key } = req.body
-  // if key not in storage, send message
-  if (!dictStorage[key]) {
+  if (!mapStorage.has(key)) {
     return res.status(200).json({ message: "Key doesn't exist" });
   }
+
   // delete from storage
   deleteValue(key);
-  // send response
   return res.status(200).json( {message: "Successfully deleted key-value pair with key \'" + key + "\' from database."} );
 })
 

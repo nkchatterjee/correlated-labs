@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/nkchatterjee/correlated-labs#readme",
   "dependencies": {
+    "datetime": "^0.0.3",
     "express": "^4.17.1"
   }
 }
